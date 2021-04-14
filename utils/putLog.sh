@@ -40,3 +40,4 @@ case $2 in
 	echo "输入有误，sorry~"
 	exit 1
 esac
+

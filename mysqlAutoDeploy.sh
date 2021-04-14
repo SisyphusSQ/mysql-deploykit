@@ -1,7 +1,7 @@
 #!/bin/bash
 # Program:
 #  log记录
-# v0.4 by alex.zhao -2021/02/26
+# v0.3 by alex.zhao -2021/02/25
 #
 # 语法：
 #  mysqlAutoDeploy.sh [-P] port
@@ -141,6 +141,10 @@ then
 	echo 'export MYSQL_HOME=/home/mysql/mysql' >>/home/mysql/.bash_profile
 	echo 'export PATH=$PATH:$MYSQL_HOME/bin' >> /home/mysql/.bash_profile
 	source /home/mysql/.bash_profile
+
+	echo 'export MYSQL_HOME=/home/mysql/mysql' >>/root/.bash_profile
+	echo 'export PATH=$PATH:$MYSQL_HOME/bin' >> /root/.bash_profile
+	source /root/.bash_profile
 	
 else
 	ct="mysql用户已存在"
@@ -153,7 +157,10 @@ else
 	cat /home/mysql/.bash_profile|grep MYSQL_HOME=/home/mysql/mysql >& /dev/null || echo 'export MYSQL_HOME=/home/mysql/mysql' >>/home/mysql/.bash_profile
 	cat /home/mysql/.bash_profile|grep MYSQL_HOME=/home/mysql/mysql >& /dev/null || echo 'export PATH=$PATH:$MYSQL_HOME/bin' >> /home/mysql/.bash_profile
 	source /home/mysql/.bash_profile
-	
+
+	cat /root/.bash_profile|grep MYSQL_HOME=/home/mysql/mysql >& /dev/null || echo 'export MYSQL_HOME=/home/mysql/mysql' >>/root/.bash_profile
+	cat /root/.bash_profile|grep MYSQL_HOME=/home/mysql/mysql >& /dev/null || echo 'export PATH=$PATH:$MYSQL_HOME/bin' >> /root/.bash_profile
+	source /root/.bash_profile
 fi
 
 # 安装mysql
@@ -162,12 +169,12 @@ pt1
 
 #mkdir -p $basefile
 
-tar zxf ./mariadb-10.1.17-linux-glibc_214-x86_64.tar.gz
+tar zxf ./mysql-8.0.21-el7-x86_64.tar.gz
 
 [ $? -ne 0 ] && err
 
 # 重命名，并移动mysql文件
-mv ./mariadb-10.1.17-linux-glibc_214-x86_64 ./mysql
+mv ./mysql-8.0.21-el7-x86_64 ./mysql
 mv ./mysql /home/mysql/
 
 # 把/home/mysql/下的mysql授权给mysql用户
@@ -183,6 +190,12 @@ pt1
 
 mkdir -p $datafile
 mkdir -p $bindir
+
+cat >> /etc/my.cnf <<EOF
+[mysql]
+prompt=mysql [\\d]>
+EOF
+
 ./utils/createMyCnf.sh $mycnf $port $socket $basefile $datafile $bindir
 
 chown -R mysql:mysql /data/mysql
@@ -194,13 +207,16 @@ pt1
 ct="开始初始化mysql"
 pt1
 
-su - mysql<<EOF
-cd $basefile
-pwd
+# mariadb的初识方式
+# su - mysql<<EOF
+# cd $basefile
+# pwd
+# ./scripts/mysql_install_db --defaults-file=$mycnf
+# EOF
 
-./scripts/mysql_install_db --defaults-file=$mycnf
+mysqld --initialize-insecure --user=mysql --basedir=$basefile --datadir=$datafile
 
-EOF
+[ $? -ne 0 ] && err
 
 ct="mysql初始化已完成"
 pt1
@@ -213,3 +229,4 @@ pt1
 
 ct="mysql已启动，自启设置已完成"
 pt1
+

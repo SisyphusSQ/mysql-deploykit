@@ -1,7 +1,7 @@
 #!/bin/bash
 # Program:
 #  log记录
-# v0.2 by alex.zhao -2021/02/26
+# v0.1 by alex.zhao -2021/02/25
 #
 # 语法：
 #  createMyCnf [目标文件] [port] [socket] [basefile] [datafile] [bindir]
@@ -38,7 +38,6 @@ cat > $mycnf <<EOF
 #default-storage-engine = Innodb
 # The following options will be passed to all MariaDB clients
 [client]
-#password	= your_password
 port		= $port
 socket		= $socket
 default-character-set = utf8
@@ -51,21 +50,23 @@ datadir = $datafile
 pid_file = /data/mysql/$port/mysql.pid
 #log_error = /data/mysql/$port/mysql.err
 port		= $port
+mysqlx_port = "${port}0"
 socket		= $socket
 transaction_isolation=READ-COMMITTED
 max_allowed_packet = 1M
+default_authentication_plugin=mysql_native_password
 #skip-external-locking
 #connection#
 interactive_timeout=1800
 skip_name_resolve=ON
 max_connections=2000
 max_connect_errors=1000
-#default-character-set = utf8
 character-set-server=utf8
 #init_connect='SET collation_connection=utf8-unicode_ci'
 #init_connect='SET NAMES  utf8'
 #collation-server=utf8_unicode_ci
 skip-character-set-client-handshake
+event_scheduler=0
 
 #session memory setting#
 sort_buffer_size = 16M
@@ -76,7 +77,7 @@ max_heap_table_size = 64M
 key_buffer_size = 256M
 table_open_cache = 256
 thread_cache_size = 8
-query_cache_size= 16M
+#query_cache_size= 16M
 character-set-server = utf8
 
 #log settings#
@@ -84,17 +85,17 @@ log_error = /data/mysql/$port/mysql.err
 slow_query_log=1
 slow_query_log_file = /data/mysql/$port/mysql-slow.log
 long_query_time = 2
-log_queries_not_using_indexes = 1
+log_queries_not_using_indexes = 0
 expire_logs_days = 15
 log-bin=$bindir/mysql-bin
 binlog_format = row
-min_examined_row_limit = 100
-#log-slave-updates = 1
+#min_examined_row_limit = 100
+sync_binlog=1
 
 
 
 # Point the following paths to different dedicated disks
-#tmpdir		= /tmp/
+tmpdir  = /tmp/
 
 # Don't listen on a TCP/IP port at all. This can be a security enhancement,
 # if all processes that need to connect to mysqld run on the same host.
@@ -109,7 +110,7 @@ min_examined_row_limit = 100
 #log-bin=mysql-bin
 
 # binary logging format - mixed recommended
-binlog_format=row
+#binlog_format=row
 
 # required unique id between 1 and 2^32 - 1
 # defaults to 1 if master-host is not set
@@ -189,8 +190,9 @@ innodb_flush_log_at_trx_commit = 1
 innodb_lock_wait_timeout = 120
 innodb_write_io_threads=8
 innodb_read_io_threads=8
+innodb_print_all_deadlocks=1
 # Try number of CPU's*2 for thread_concurrency
-thread_concurrency = 16
+# thread_concurrency = 16
 innodb_max_dirty_pages_pct=90
 
 
@@ -218,8 +220,8 @@ interactive-timeout
 [mysqld_safe]
 open-files-limit = 4096
 #default-character-set = utf8
-
 #log_bin_trust_function_creators=1
 
 EOF
+
 

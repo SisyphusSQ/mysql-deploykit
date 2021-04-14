@@ -40,7 +40,7 @@ function pt1(){
 # 检查$?的返回值
 function ckRc(){
 
-	if [ $? -ne 0 ]
+	if [ ${RC} -ne 0 ]
 	then
 		
 		ct="error，shell退出"
@@ -125,16 +125,18 @@ ct="已创建my.cnf配置文件"
 pt1
 
 # 初始化mysql
-ct="开始初始化mysql"
-pt1
+# ct="开始初始化mysql"
+# pt1
 
-su - mysql<<EOF
-cd $basefile
-pwd
+# su - mysql<<EOF
+# cd $basefile
+# pwd
+# ./scripts/mysql_install_db --defaults-file=$mycnf
+# EOF
 
-./scripts/mysql_install_db --defaults-file=$mycnf
+mysqld --initialize-insecure --user=mysql --basedir=$basefile --datadir=$datafile
 
-EOF
+[ $? -ne 0 ] && err
 
 ct="mysql初始化已完成"
 pt1
@@ -147,5 +149,6 @@ pt1
 
 ct="mysql已启动，自启设置已完成"
 pt1
+
 
 

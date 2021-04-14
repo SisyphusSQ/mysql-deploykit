@@ -4,7 +4,7 @@
 # v0.1 by alex.zhao -2021/02/24
 #
 # 语法：
-#  printOut.sh [1|2|3] [content]
+#  putLog.sh [1|2|3] [content]
 ###############################
 
 # 设置颜色
@@ -45,3 +45,4 @@ case $1 in
 	printf "输入有误，sorry~"
 	exit 1
 esac
+

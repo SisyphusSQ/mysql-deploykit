@@ -6,6 +6,8 @@
 # 语法：
 #  mysqlAutoStart.sh [mycnf] [basefile] [port]
 #
+# 测试：
+#  mysqlAutoStart.sh 
 #
 ###############################
 
@@ -16,8 +18,8 @@ port=$3
 serv=mysqld$port.service
 
 # 建立软链接
-mkdir -p /usr/local/mysql/bin/
-ln -s $basefile/bin/mysqld /usr/local/mysql/bin/mysqld
+mkdir -p /usr/local/mysql/
+ln -s $basefile /usr/local/mysql/
 
 chown -R mysql:mysql /usr/local/mysql
 
@@ -48,5 +50,6 @@ systemctl daemon-reload
 
 systemctl start $serv && systemctl enable $serv
 systemctl status $serv
+
 
 
